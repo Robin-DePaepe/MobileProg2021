@@ -1,25 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class CurrencyManager : MonoBehaviour
 {
     private uint m_CurrentValue = 0;
     private uint m_MaxValue = uint.MaxValue;
 
-    private Sprite m_Icon= null;
+    private TextMeshProUGUI m_CurrencyText;
 
-    public Sprite Icon
-    {
-        get { return m_Icon; }
-    }
+    public uint CurrentCurrency
+    { get { return m_CurrentValue; } }
 
-    protected void Initialize(Sprite icon,uint startValue = 0, uint maxValue = uint.MaxValue)
+    protected void Initialize(TextMeshProUGUI currencyText, uint startValue = 0, uint maxValue = uint.MaxValue)
     {
         m_CurrentValue = startValue;
         m_MaxValue = maxValue;
 
-        m_Icon = icon;
+        m_CurrencyText = currencyText;
+
+        ClampCurrency();
     }
 
     public void AddCurrency(uint amount)
@@ -46,5 +47,7 @@ public class CurrencyManager : MonoBehaviour
         //clamp currency between 0 and maxValue
         if (m_CurrentValue < 0) m_CurrentValue = 0;
         else if (m_CurrentValue > m_MaxValue) m_CurrentValue = m_MaxValue;
+
+       if(m_CurrencyText) m_CurrencyText.text = m_CurrentValue.ToString();
     }
 }
