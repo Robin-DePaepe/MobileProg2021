@@ -9,29 +9,30 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 {
     public enum addTypes { reward, interstitial, banner };
 
-    [SerializeField] string _androidGameId;
-    [SerializeField] string _iOsGameId;
     [SerializeField] bool _testMode = true;
     [SerializeField] bool _enablePerPlacementMode = true;
+
+    //ids
+    [SerializeField] string _androidGameId;
+    [SerializeField] string _iOsGameId;
 
     Dictionary<addTypes, string> _AdunitIds = new Dictionary<addTypes, string>() {
         {addTypes.reward, "Rewarded_" },
         {addTypes.interstitial, "Interstitial_" },
         {addTypes.banner, "Banner_" }
     };
-    //reward
-    [SerializeField] Button _showAdButton;
-    //string _androidAdUnitId = "Rewarded_Android";
-    //string _iOsAdUnitId = "Rewarded_iOS";
-    //interstitial 
-    //    string _androidAdUnitId = "Interstitial_Android";
-    //string _iOsAdUnitId = "Interstitial_iOS";
-    //string _adUnitId;
-
     string _androidAdUnitId = "Android";
     string _iOsAdUnitId = "iOS";
 
     private string _gameId;
+
+    //reward
+    [SerializeField] Button _showAdButton;
+
+    //banner
+    [SerializeField] BannerPosition _bannerPosition = BannerPosition.TOP_CENTER;
+
+
 
     void Awake()
     {
@@ -46,6 +47,10 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
         }
         //Disable button until ad is ready to show
         _showAdButton.interactable = false;
+
+        //setup banner
+        Advertisement.Banner.SetPosition(_bannerPosition);
+        LoadBanner();
     }
 
     public void InitializeAds()
@@ -85,7 +90,7 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     public void ShowAd(addTypes type)
     {
         // Disable the button: 
-     if(type == addTypes.reward)   _showAdButton.interactable = false;
+        if (type == addTypes.reward) _showAdButton.interactable = false;
 
         // Note that if the ad content wasn't previously loaded, this method will fail
         Debug.Log("Showing Ad: " + _AdunitIds[type]);
@@ -152,4 +157,53 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
         // Load another ad:
         Advertisement.Load(placementId, this);
     }
+
+    //banner functions
+
+    // Implement a method to call when the Load Banner button is clicked:
+    public void LoadBanner()
+    {
+        // Set up options to notify the SDK of load events:
+        BannerLoadOptions options = new BannerLoadOptions
+        {
+            loadCallback = OnBannerLoaded,
+            errorCallback = OnBannerError
+        };
+
+        // Load the Ad Unit with banner content:
+        Advertisement.Banner.Load(_AdunitIds[addTypes.banner], options);
+    }
+
+    // Implement code to execute when the loadCallback event triggers:
+    void OnBannerLoaded()
+    {
+        Debug.Log("Banner loaded");
+        ShowBannerAd();
+    }
+
+    // Implement code to execute when the load errorCallback event triggers:
+    void OnBannerError(string message)
+    {
+        Debug.Log($"Banner Error: {message}");
+        // Optionally execute additional code, such as attempting to load another ad.
+    }
+
+    // Implement a method to call when the Show Banner button is clicked:
+    void ShowBannerAd()
+    {
+        // Set up options to notify the SDK of show events:
+        BannerOptions options = new BannerOptions
+        {
+            clickCallback = OnBannerClicked,
+            hideCallback = OnBannerHidden,
+            showCallback = OnBannerShown
+        };
+
+        // Show the loaded Banner Ad Unit:
+        Advertisement.Banner.Show(_AdunitIds[addTypes.banner], options);
+    }
+
+    void OnBannerClicked() { }
+    void OnBannerShown() { }
+    void OnBannerHidden() { }
 }
