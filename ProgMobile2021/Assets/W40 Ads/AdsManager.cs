@@ -1,24 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Advertisements;
 using UnityEngine.UI;
 
 public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsListener
 {
+    public enum addTypes { reward, interstitial, banner };
+
     [SerializeField] string _androidGameId;
     [SerializeField] string _iOsGameId;
     [SerializeField] bool _testMode = true;
     [SerializeField] bool _enablePerPlacementMode = true;
 
+    Dictionary<addTypes, string> _AdunitIds = new Dictionary<addTypes, string>() {
+        {addTypes.reward, "Rewarded_" },
+        {addTypes.interstitial, "Interstitial_" },
+        {addTypes.banner, "Banner_" }
+    };
     //reward
     [SerializeField] Button _showAdButton;
-   string _androidAdUnitId = "Rewarded_Android";
-   string _iOsAdUnitId = "Rewarded_iOS";
+    //string _androidAdUnitId = "Rewarded_Android";
+    //string _iOsAdUnitId = "Rewarded_iOS";
     //interstitial 
-    //string _androidAdUnitId = "Interstitial_Android";
+    //    string _androidAdUnitId = "Interstitial_Android";
     //string _iOsAdUnitId = "Interstitial_iOS";
-    string _adUnitId;
+    //string _adUnitId;
+
+    string _androidAdUnitId = "Android";
+    string _iOsAdUnitId = "iOS";
 
     private string _gameId;
 
@@ -26,14 +37,15 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     {
         InitializeAds();
 
-        _adUnitId = (Application.platform == RuntimePlatform.IPhonePlayer)
-    ? _iOsAdUnitId
-    : _androidAdUnitId;
+        //setup the ids and load the ads
+        string platform = (Application.platform == RuntimePlatform.IPhonePlayer) ? _iOsAdUnitId : _androidAdUnitId;
 
+        for (int i = 0; i < _AdunitIds.Count; i++)
+        {
+            _AdunitIds[(addTypes)i] += platform;
+        }
         //Disable button until ad is ready to show
         _showAdButton.interactable = false;
-
-        Invoke("LoadAd", 3f);
     }
 
     public void InitializeAds()
@@ -48,6 +60,11 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     public void OnInitializationComplete()
     {
         Debug.Log("Unity Ads initialization complete.");
+
+        foreach (var id in _AdunitIds)
+        {
+            LoadAd(id.Value);
+        }
     }
 
     public void OnInitializationFailed(UnityAdsInitializationError error, string message)
@@ -57,22 +74,22 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
 
     // Load content to the Ad Unit:
-    public void LoadAd()
+    public void LoadAd(string id)
     {
         // IMPORTANT! Only load content AFTER initialization (in this example, initialization is handled in a different script).
-        Debug.Log("Loading Ad: " + _adUnitId);
-        Advertisement.Load(_adUnitId, this);
+        Debug.Log("Loading Ad: " + id);
+        Advertisement.Load(id, this);
     }
 
     // Show the loaded content in the Ad Unit: 
-    public void ShowAd()
+    public void ShowAd(addTypes type)
     {
         // Disable the button: 
-        _showAdButton.interactable = false;
+     if(type == addTypes.reward)   _showAdButton.interactable = false;
 
         // Note that if the ad content wasn't previously loaded, this method will fail
-        Debug.Log("Showing Ad: " + _adUnitId);
-        Advertisement.Show(_adUnitId);
+        Debug.Log("Showing Ad: " + _AdunitIds[type]);
+        Advertisement.Show(_AdunitIds[type]);
     }
 
     // Implement Load Listener and Show Listener interface methods:  
@@ -80,10 +97,10 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     {
         Debug.Log("Ad Loaded: " + adUnitId);
 
-        if (adUnitId.Equals(_adUnitId))
+        if (adUnitId.Contains("Rewarded"))
         {
             // Configure the button to call the ShowAd() method when clicked:
-            _showAdButton.onClick.AddListener(ShowAd);
+            _showAdButton.onClick.AddListener(delegate { ShowAd(_AdunitIds.FirstOrDefault(id => id.Value == adUnitId).Key); });
             // Enable the button for users to click:
             _showAdButton.interactable = true;
         }
@@ -117,7 +134,7 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
     public void OnUnityAdsDidError(string message)
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Error: " + message);
     }
 
     public void OnUnityAdsDidStart(string placementId)
@@ -126,13 +143,13 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
     public void OnUnityAdsDidFinish(string placementId, ShowResult showResult)
     {
-        if (placementId.Equals("Rewarded_Android") && showResult.Equals(ShowResult.Finished))
+        if (placementId.Contains("Rewarded") && showResult.Equals(ShowResult.Finished))
         {
             Debug.Log("Unity Ads Rewarded Ad Completed");
             // Grant a reward.
             CoinManager.Instance.AddCurrency(100);
-            // Load another ad:
-            Advertisement.Load(_adUnitId, this);
         }
+        // Load another ad:
+        Advertisement.Load(placementId, this);
     }
 }
