@@ -15,4 +15,5 @@ In this repository I will create the weekly assignments of mobile programming 20
 #Advertisements
 
 First you see a random add pop up, then I click the reward button to see an add to get 100 coins. Meanwhile at the bottom you can see an add banner. 
-https://gyazo.com/4e059dbb9435089b634da39dd72b9ecb
+![Spending coins](https://github.com/Robin-DePaepe/MobileProg2021/blob/main/Media/Ads.gif)
+
