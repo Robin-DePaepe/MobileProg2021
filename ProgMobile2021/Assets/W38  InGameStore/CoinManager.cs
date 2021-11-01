@@ -10,18 +10,18 @@ public class CoinManager : CurrencyManager
 
     public static CoinManager Instance { get { return m_Instance; } }
 
+    protected override void SaveCurrency()
+    {  
+    }
+
     void Awake()
     {
-        m_CurrencyText = GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI CurrencyText = GetComponent<TextMeshProUGUI>();
 
-        if (!m_CurrencyText) Debug.LogWarning("currency text not found");
+        if (!CurrencyText) Debug.LogWarning("currency text not found");
 
       if(m_Instance == null)  m_Instance = this;
 
-        base.Initialize(m_CurrencyText,500);
+        base.Initialize(CurrencyText, 500);
     }
-
-    //vars
-    private TextMeshProUGUI m_CurrencyText = null;
-
 }

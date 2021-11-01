@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class CurrencyManager : MonoBehaviour
+public abstract class CurrencyManager : MonoBehaviour
 {
     private uint m_CurrentValue = 0;
     private uint m_MaxValue = uint.MaxValue;
@@ -12,6 +12,8 @@ public class CurrencyManager : MonoBehaviour
 
     public uint CurrentCurrency
     { get { return m_CurrentValue; } }
+
+    bool m_CurrencyChanged = false;
 
     protected void Initialize(TextMeshProUGUI currencyText, uint startValue = 0, uint maxValue = uint.MaxValue)
     {
@@ -48,6 +50,20 @@ public class CurrencyManager : MonoBehaviour
         if (m_CurrentValue < 0) m_CurrentValue = 0;
         else if (m_CurrentValue > m_MaxValue) m_CurrentValue = m_MaxValue;
 
-       if(m_CurrencyText) m_CurrencyText.text = m_CurrentValue.ToString();
+        SaveCurrency();
+
+
+        if (m_CurrencyText) m_CurrencyChanged = true; 
     }
+
+    private void Update()
+    {
+        if (m_CurrencyChanged) //this is necessary bc the function might be called from an async method and not update the text 
+        {
+            m_CurrencyText.text = m_CurrentValue.ToString();
+            m_CurrencyChanged = false;
+        }
+    }
+
+    protected abstract void SaveCurrency();
 }

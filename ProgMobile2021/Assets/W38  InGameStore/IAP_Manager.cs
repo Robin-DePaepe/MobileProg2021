@@ -19,19 +19,23 @@ public class IAP_Manager : MonoBehaviour
 
     public void OnPurchaseCompleted(Product product)
     {
+        CurrencyManager currencyManager = FindObjectOfType<CoinManager>();
+        if(!currencyManager) currencyManager = FindObjectOfType<CoinManagerSavedLocally>();
+        if (!currencyManager) currencyManager = FindObjectOfType<CoinManagerSavedOnline>();
+
         switch (product.definition.id)
         {
             case "com.Robin.MobileProg2021.1500Coins":
-                CoinManager.Instance.AddCurrency(1500);
+                currencyManager.AddCurrency(1500);
                 break;
             case "com.Robin.MobileProg2021.5000Coins":
-                CoinManager.Instance.AddCurrency(5000);
+                currencyManager.AddCurrency(5000);
                 break;
             case "com.Robin.MobileProg2021.12500Coins":
-                CoinManager.Instance.AddCurrency(12500);
+                currencyManager.AddCurrency(12500);
                 break;
             case "com.Robin.MobileProg2021.20000Coins":
-                CoinManager.Instance.AddCurrency(20000);
+                currencyManager.AddCurrency(20000);
                 break;
             default:
                 break;
