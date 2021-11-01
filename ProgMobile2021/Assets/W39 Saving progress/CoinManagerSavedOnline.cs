@@ -16,7 +16,7 @@ public class CoinManagerSavedOnline : CurrencyManager
 
     void Awake()
     {
-        int currentCoins = 200;
+        int currentCoins ;
         TextMeshProUGUI CurrencyText = GetComponent<TextMeshProUGUI>();
 
         if (!CurrencyText) Debug.LogWarning("currency text not found");
@@ -33,10 +33,10 @@ public class CoinManagerSavedOnline : CurrencyManager
             else if (task.IsCompleted)
             {
                 Debug.Log("Loading succes");
-                DataSnapshot snapshot = task.Result;
 
+                DataSnapshot snapshot = task.Result;
                 currentCoins = int.Parse(snapshot.Value.ToString());
-                Debug.Log(currentCoins);
+
                 base.Initialize(CurrencyText, (uint)currentCoins);
             }
         });
@@ -48,7 +48,6 @@ public class CoinManagerSavedOnline : CurrencyManager
         {
             if (task.IsFaulted) Debug.Log("saving failed");
             else if (task.IsCompleted) Debug.Log("saving succes");
-            Debug.Log(CurrentCurrency);
         });
     }
 
